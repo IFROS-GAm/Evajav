@@ -3,49 +3,55 @@
 
 {% block content %}
 
-    <form id="calification">
-        
-        <legend id="Selectormestro"></legend>
+<a href="/seleccionatuprofesor" class="btn-back">Volver</a>
+
+    <form id="calification" action="/calificaElProfesor" method="post">
+        <input type="hidden" name="maestro" value="{{ maestro }}">
+        <legend>Evaluando a: {{ maestro }}</legend>
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
         <label for="explicationsTopics">Explicación del tema</label>
-        
-            <select id="explicationsTopics">
+
+            <select id="explicationsTopics" name="explicationsTopics" required>
                 <option value="">Nota</option>
                 <option value="Malo">Malo</option>
-                <option value="Regular">Regular</option>    
+                <option value="Regular">Regular</option>
                 <option value="Bien" >Bien</option>
                 <option value="Excelente">Excelente</option>
             </select>
-            
-        
-        <label class="track" for="actitudinal">Actitudinal </label>  
-        
-        
-        
-            <select id="actitudinal">
+
+
+        <label class="track" for="actitudinal">Actitudinal </label>
+
+
+
+            <select id="actitudinal" name="actitudinal" required>
                 <option value="">Nota</option>
                 <option value="Malo">Malo</option>
-                <option value="Regular">Regular</option>    
+                <option value="Regular">Regular</option>
                 <option value="Bien">Bien</option>
                 <option value="Excelente">Excelente</option>
             </select>
-            
-        
+
 
         <label for="classActivity" class="track">
         Actividades de clase
         </label>
-        
-        
-            <select id="classActivity">
+
+
+            <select id="classActivity" name="classActivity" required>
                 <option value="">Nota</option>
                 <option value="Malo">Malo</option>
-                <option value="Regular">Regular</option>    
+                <option value="Regular">Regular</option>
                 <option value="Bien">Bien</option>
                 <option value="Excelente">Excelente</option>
             </select>
-            
+
     <button type="submit">Enviar</button>
-    
+
     </form>
 
 {% endblock %}

@@ -3,23 +3,27 @@
 
 {% block content %}
 
+<a href="/" class="btn-back">Volver</a>
 
-
-    <form id="Selectormestro">
+    <form id="Selectormestro" action="/seleccionatuprofesor" method="post">
         <legend>
             David Gomez Arteaga
         </legend>
-        
-            
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
         <label for="maestro" >¿A quién quieres evaluar?</label>
-            <select id="maestro" name="maestro">
+            <select id="maestro" name="maestro" required>
                 <option value="">Elige a un maestro</option>
-                <option value="Lenny">Lenny</option>    
+                <option value="Lenny">Lenny</option>
                 <option value="Erika">Erika</option>
                 <option value="Fredy">Freddy</option>
             </select>
-                
+
         <button type="submit" >seguir</button>
+    </form>
 
 {% endblock %}
 

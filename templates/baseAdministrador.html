@@ -1,25 +1,28 @@
 <!DOCTYPE html>
-<html lang="es" defer>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% block stylesheets %}
-<link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='administrador.css') }}">
 {% endblock %}
 
     <link rel="icon" href="{{ url_for('static', path='favicon.png') }}" type="image/x-icon">
-    <title> {% block title %} EvaJav {% endblock %}</title>
+    <title>{% block title %}EvaJav{% endblock %}</title>
 </head>
 <body>
-    {% block content %}{% endblock %}
     {% block nav %}
     <nav>
+        <a href="/" class="btn-back">Volver</a>
         <ul>
-            <li><a href="">Inicio</a></li>
-            <li><a href="">Gestión de Profesores</a></li>
-            <li><a href="">Centro Estadístico</a></li>
+            <li><a href="/administrador">Inicio</a></li>
+            <li><a href="/gestionProfesores">Gestión de Profesores</a></li>
+            <li><a href="/centroEstadistico">Centro Estadístico</a></li>
         </ul>
     </nav>
     {% endblock %}
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
 </body>
 </html>

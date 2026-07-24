@@ -1,5 +1,5 @@
 fastapi
 jinja2
-psycopg2-binary
+asyncpg
 python-dotenv
 pytest
