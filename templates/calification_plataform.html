@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %} ¿A quién quieres evaluar? {% endblock %}
-
+{% block script %} <script src="../static/js/cal_plataform.js" defer></script> {% endblock script %}
 {% block content %}
 
 <a href="/seleccionatuprofesor" class="btn-back">Volver</a>
@@ -37,12 +37,19 @@
             </select>
 
 
+<<<<<<< HEAD
         <label for="classActivity" class="track">
         Actividades de clase
         </label>
 
 
             <select id="classActivity" name="classActivity" required>
+=======
+        <label for="classActivity" class="track">Actividades de clase</label>
+        
+        
+            <select id="classActivity">
+>>>>>>> c26b636a3ff9b4817884dc49469ec3efb5b36ec0
                 <option value="">Nota</option>
                 <option value="Malo">Malo</option>
                 <option value="Regular">Regular</option>

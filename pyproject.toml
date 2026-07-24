@@ -4,9 +4,13 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
+<<<<<<< HEAD
 dependencies = [
     "asyncpg>=0.31.0",
     "dotenv>=0.9.9",
     "fastapi[standard]>=0.139.2",
     "python-dotenv>=1.2.2",
 ]
+=======
+dependencies = []
+>>>>>>> c26b636a3ff9b4817884dc49469ec3efb5b36ec0
