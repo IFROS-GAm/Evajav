@@ -4,3 +4,6 @@ asyncpg
 python-dotenv
 pytest
 uvicorn
+os
+asyncpg
+python-dotenv
