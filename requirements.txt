@@ -4,7 +4,5 @@ asyncpg
 python-dotenv
 pytest
 uvicorn
-os
 asyncpg
-contextlib
 python-dotenv
