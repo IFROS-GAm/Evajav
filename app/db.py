@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
-DATABASE_URL = os.getenv("Database_URL") 
+DATABASE_URL = os.getenv("DATABASE_URL") 
 
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is not set")
