@@ -6,4 +6,5 @@ pytest
 uvicorn
 os
 asyncpg
+contextlib
 python-dotenv
