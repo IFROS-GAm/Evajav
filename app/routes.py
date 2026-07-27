@@ -8,8 +8,24 @@ templates = Jinja2Templates(directory="templates")
 
 
 @router.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
+async def inicio(request: Request):
+    return templates.TemplateResponse(request=request, name="inicio.html", context={})
+
+
+@router.get("/inicio-sesion", response_class=HTMLResponse)
+async def inicio_sesion(request: Request):
     return templates.TemplateResponse(request=request, name="index.html", context={})
+
+
+@router.get("/registrarse", response_class=HTMLResponse)
+async def registrarse(request: Request):
+    return templates.TemplateResponse(request=request, name="registrarse.html", context={})
+
+
+@router.post("/registrarse")
+async def registrarse_post(username: str = Form(...), password: str = Form(...)):
+    # TODO: Implementar lógica de persistencia de registro (inserción en DB, hashing de contraseña, etc.)
+    return PlainTextResponse("TODO: Implementar lógica de registro", status_code=501)
 
 
 @router.post("/login")
