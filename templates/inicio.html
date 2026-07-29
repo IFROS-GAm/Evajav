@@ -1,11 +1,15 @@
 {% extends "base.html" %}
 {% block title %}EvaJav{% endblock %}
 {% block content %}
-<div class="welcome-container">
+<form>
     <h1>EvaJav - Evaluación de Profesores</h1>
     <nav>
-        <a href="{{ url_for('inicio_sesion') }}" class="btn">Iniciar sesión</a>
-        <a href="{{ url_for('registrarse') }}" class="btn">Registrarse</a>
+        <a href="/inicio-sesion" >
+            <button type="button" value="Iniciar sesión">Iniciar sesión</button>
+        </a>
+        <a href="/registrarse">
+            <button type="button" value="Registrarse">Registrarse</button>
+        </a>
     </nav>
-</div>
+</form>
 {% endblock %}
