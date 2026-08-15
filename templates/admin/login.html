@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Login{% endblock %}
+
+{% block content %}
+<div class="caja-neumorfica" style="max-width: 400px; margin: 4rem auto; text-align: center;">
+    <h2 style="color: var(--accent-color);">Panel de Administración</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Acceso exclusivo para coordinación académica.</p>
+    
+    {% if error %}
+    <div class="alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form action="/admin/login" method="POST">
+        <input type="text" name="username" class="input-neumorfico" placeholder="Usuario administrador" required>
+        <input type="password" name="password" class="input-neumorfico" placeholder="Contraseña" required>
+        <button type="submit" class="btn-neumorfico">Entrar al Sistema</button>
+    </form>
+</div>
+{% endblock %}

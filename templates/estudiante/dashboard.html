@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Profesores{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h2>Mis Profesores Asignados</h2>
+    <p style="color: var(--text-secondary);">
+        A continuación verás a los profesores que dictan clase a tu grupo. 
+        Por favor, evalúa a cada uno con honestidad.
+    </p>
+    {% if error %}
+    <div class="caja-neumorfica" style="border-left: 4px solid var(--danger-color); padding: 1rem;">
+        {{ error }}
+    </div>
+    {% endif %}
+    {% if periodo %}
+    <p style="font-size: 0.9rem; color: #10b981;">
+        ✅ <strong>Periodo activo.</strong> Cierra el: {{ periodo.fecha_fin.strftime('%Y-%m-%d %H:%M') }}
+    </p>
+    {% endif %}
+</div>
+
+{% if profesores %}
+<div class="grid-profesores">
+    {% for prof in profesores %}
+    <div class="caja-neumorfica card-profesor">
+        <h3>{{ prof.nombre }} {{ prof.apellido }}</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; min-height: 40px;">
+            {{ prof.materias }}
+        </p>
+        
+        {% if prof.id in profesores_votados %}
+            <div class="voted-badge">
+                ✓ Ya evaluado
+            </div>
+        {% else %}
+            <a href="/votar/{{ prof.id }}" class="btn-neumorfico" style="margin-top: 1rem;">Evaluar</a>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

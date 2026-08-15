@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Reportes de Evaluación Docente{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h2>Reportes Estadísticos</h2>
+    <p style="color: var(--text-secondary);">Resultados promediados de la última evaluación cerrada.</p>
+</div>
+
+{% if error %}
+<div class="caja-neumorfica" style="border-left: 4px solid var(--danger-color);">
+    {{ error }}
+</div>
+{% else %}
+
+<!-- Incluimos Chart.js vía CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="reporte-grid">
+    {% for res in resultados %}
+    <div class="caja-neumorfica">
+        <h3>{{ res.nombre }} {{ res.apellido }}</h3>
+        <p style="font-size: 0.9rem; color: var(--text-secondary);">
+            Participación: <strong>{{ res.cantidad_votos }}</strong> estudiantes evaluaron a este docente.
+        </p>
+        
+        <!-- Contenedor del gráfico -->
+        <div style="position: relative; height: 300px; width: 100%; margin-top: 1.5rem;">
+            <canvas id="chart_{{ loop.index }}"></canvas>
+        </div>
+        
+        <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const ctx = document.getElementById('chart_{{ loop.index }}').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: [
+                        'Dominio Tema', 'Puntualidad', 'Claridad', 'Recursos', 
+                        'Res. Dudas', 'Ev. Justa', 'Fomento Part.', 
+                        'Respeto', 'Organización', 'Temario'
+                    ],
+                    datasets: [{
+                        label: 'Promedio obtenido',
+                        data: [
+                            {{ res.a1|round(1) }}, {{ res.a2|round(1) }}, {{ res.a3|round(1) }},
+                            {{ res.a4|round(1) }}, {{ res.a5|round(1) }}, {{ res.a6|round(1) }},
+                            {{ res.a7|round(1) }}, {{ res.a8|round(1) }}, {{ res.a9|round(1) }},
+                            {{ res.a10|round(1) }}
+                        ],
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)', // Azul eléctrico semitransparente
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(59, 130, 246, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: {
+                                color: '#94a3b8',
+                                font: { size: 10 }
+                            },
+                            ticks: {
+                                color: '#e2e8f0',
+                                backdropColor: 'transparent',
+                                min: 0,
+                                max: 5,
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        });
+        </script>
+    </div>
+    {% endfor %}
+</div>
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Registro de Estudiante{% endblock %}
+
+{% block content %}
+<div class="caja-neumorfica" style="max-width: 500px; margin: 2rem auto;">
+    <h2 style="text-align: center;">Crear Cuenta</h2>
+    <p style="color: var(--text-secondary); text-align: center; margin-bottom: 2rem;">
+        Regístrate para poder evaluar a tus profesores. El carnet garantizará que no hayan votos duplicados.
+    </p>
+    
+    {% if error %}
+    <div class="alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form action="/registro" method="POST">
+        <label style="font-size: 0.9rem; color: var(--text-secondary);">Nombre</label>
+        <input type="text" name="nombre" class="input-neumorfico" placeholder="Ej. Juan" required>
+        
+        <label style="font-size: 0.9rem; color: var(--text-secondary);">Apellido</label>
+        <input type="text" name="apellido" class="input-neumorfico" placeholder="Ej. Pérez" required>
+        
+        <label style="font-size: 0.9rem; color: var(--text-secondary);">Número de Carnet</label>
+        <!-- Este carnet servirá como llave única (Primary Key conceptual) en la base de datos -->
+        <input type="text" name="carnet" class="input-neumorfico" placeholder="Carnet estudiantil" required>
+        
+        <label style="font-size: 0.9rem; color: var(--text-secondary);">Grupo</label>
+        <select name="grupo_id" class="input-neumorfico" required style="cursor: pointer; appearance: none;">
+            <option value="" disabled selected>Selecciona tu grupo</option>
+            {% for g in grupos %}
+            <option value="{{ g.id }}">{{ g.codigo_grupo }}</option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit" class="btn-neumorfico" style="margin-top: 1rem;">Registrarse y Entrar</button>
+    </form>
+    
+    <div style="text-align: center; margin-top: 1.5rem;">
+        <a href="/" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;">Volver al Login</a>
+    </div>
+</div>
+{% endblock %}

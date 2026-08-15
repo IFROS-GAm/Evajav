@@ -1,9 +1,5 @@
-.venv
+venv/
 .env
-.vscode
-__pycache__
-uv.lock
-pyproject.toml
-.python-version
-test/
-.vscode/
+__pycache__/
+*.pyc
+fix.py

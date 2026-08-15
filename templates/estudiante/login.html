@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Ingreso de Estudiantes{% endblock %}
+
+{% block content %}
+<div class="caja-neumorfica" style="max-width: 400px; margin: 4rem auto; text-align: center;">
+    <h2>Ingreso Estudiantes</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Ingresa tu número de carnet para continuar.</p>
+    
+    {% if error %}
+    <div class="alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form action="/login" method="POST">
+        <input type="text" name="carnet" class="input-neumorfico" placeholder="Ingresa tu carnet" required>
+        <button type="submit" class="btn-neumorfico">Entrar</button>
+    </form>
+    
+    <p style="margin-top: 2rem; font-size: 0.9rem;">
+        ¿Aún no estás registrado? <br>
+        <a href="/registro" style="color: var(--accent-color); text-decoration: none; font-weight: bold;">Regístrate aquí</a>
+    </p>
+</div>
+{% endblock %}

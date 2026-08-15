@@ -1,0 +1,249 @@
+/* 
+   Estilo Neumorfismo Oscuro
+   Paleta: 
+   Fondo general: #1a1c23
+   Superficies: #22252e
+   Sombra oscura: #15171c
+   Sombra clara: #2f333f
+   Acento: #3b82f6 (azul eléctrico)
+*/
+
+:root {
+  --bg-color: #1a1c23;
+  --surface-color: #22252e;
+  --shadow-dark: #15171c;
+  --shadow-light: #2f333f;
+  --accent-color: #3b82f6;
+  --accent-hover: #2563eb;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --danger-color: #ef4444;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+h1, h2, h3 {
+  color: var(--text-primary);
+  margin-top: 0;
+}
+
+.container-principal {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  flex-grow: 1;
+}
+
+/* ==================================
+   Utilidades Neumórficas
+================================== */
+
+.caja-neumorfica {
+  background-color: var(--surface-color);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 
+    8px 8px 16px var(--shadow-dark), 
+    -8px -8px 16px var(--shadow-light);
+  margin-bottom: 2rem;
+}
+
+.input-neumorfico {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 1.5rem;
+  background-color: var(--surface-color);
+  border: none;
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  box-shadow: inset 4px 4px 8px var(--shadow-dark), 
+              inset -4px -4px 8px var(--shadow-light);
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.input-neumorfico:focus {
+  box-shadow: inset 6px 6px 12px var(--shadow-dark), 
+              inset -6px -6px 12px var(--shadow-light),
+              0 0 0 2px rgba(59, 130, 246, 0.3); /* Aura azul */
+}
+
+.btn-neumorfico {
+  display: inline-block;
+  width: 100%;
+  padding: 12px 16px;
+  background-color: var(--surface-color);
+  color: var(--accent-color);
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 4px 4px 8px var(--shadow-dark), 
+              -4px -4px 8px var(--shadow-light);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.btn-neumorfico:hover {
+  color: var(--text-primary);
+  background-color: var(--accent-color);
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2), 
+              inset -2px -2px 5px rgba(255,255,255,0.1);
+}
+
+.btn-neumorfico:active {
+  box-shadow: inset 4px 4px 8px var(--shadow-dark), 
+              inset -4px -4px 8px var(--shadow-light);
+}
+
+.btn-secondary {
+  color: var(--text-secondary);
+}
+
+.btn-secondary:hover {
+  background-color: transparent;
+  color: var(--text-primary);
+}
+
+.alert-error {
+  color: var(--danger-color);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* ==================================
+   Layouts Específicos
+================================== */
+
+.navbar-superior {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: var(--surface-color);
+  box-shadow: 0 4px 8px var(--shadow-dark);
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  margin-left: 1rem;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover {
+  color: var(--accent-color);
+}
+
+.grid-profesores {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.card-profesor {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.voted-badge {
+  color: #10b981; /* Verde éxito */
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+.lista-preguntas {
+  list-style: none;
+  padding: 0;
+}
+
+.pregunta-item {
+  margin-bottom: 2rem;
+}
+
+.pregunta-item h4 {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+/* Radio buttons como botones neumórficos */
+.opciones-escala {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.opciones-escala label {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+}
+
+.opciones-escala input[type="radio"] {
+  display: none;
+}
+
+.radio-btn-ui {
+  display: block;
+  padding: 10px 0;
+  border-radius: 8px;
+  background-color: var(--surface-color);
+  box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+  transition: all 0.2s;
+}
+
+.opciones-escala input[type="radio"]:checked + .radio-btn-ui {
+  background-color: var(--accent-color);
+  color: white;
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
+}
+
+.reporte-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .reporte-grid {
+    grid-template-columns: 1fr;
+  }
+  .navbar-superior {
+    flex-direction: column;
+    gap: 10px;
+    padding: 1rem;
+  }
+}
+
+/* ==================================
+   Partículas Background
+================================== */
+#particles-js {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+.navbar-superior, .container-principal {
+  position: relative;
+  z-index: 1;
+}
