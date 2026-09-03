@@ -399,11 +399,15 @@ td.num, th.num { font-family: var(--mono); text-align: right; }
 tbody tr { transition: background 0.15s ease; }
 .input { transition: border-color 0.15s, box-shadow 0.15s, background 0.15s; }
 
+@keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+  /* No se apaga todo: molesta el desplazamiento y lo que repite sin fin, no un
+     desvanecido corto. Así la interfaz sigue viva con el sistema en "menos
+     movimiento", que en Windows viene apagado con más frecuencia de lo que parece. */
+  .card, .head, .nav, .alert { animation: aparecer 0.25s ease both; }
+  .badge.vivo::before { animation: none; }
   .card:hover { transform: none; }
+  .btn::after { transition: none; }
+  .scale input:checked + label { animation: none; }
 }

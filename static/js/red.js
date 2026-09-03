@@ -5,13 +5,17 @@
   if (!lienzo) return;
 
   const ctx = lienzo.getContext("2d");
-  const quieto = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Con "menos movimiento" activado en el sistema el fondo NO se congela: se mueve
+  // algo más lento y deja de reaccionar al cursor. Quedarse quieto se leía como un
+  // fallo, y en Windows esa opción viene apagada con mucha frecuencia.
+  const suave = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const VELOCIDAD = suave ? 0.5 : 0.75;
   const DISTANCIA = 155;   // hasta dónde se unen dos puntos
   const RATON = 220;       // radio de influencia del cursor
   const DENSIDAD = 8500;   // un punto por cada N píxeles de pantalla
   let puntos = [];
-  let animacion = null;
   let raton = { x: -9999, y: -9999 };
+  let ultimoDibujo = 0;
 
   const medir = () => {
     const escala = Math.min(devicePixelRatio || 1, 2);
@@ -23,33 +27,33 @@
     puntos = Array.from({ length: cuantos }, () => ({
       x: Math.random() * innerWidth,
       y: Math.random() * innerHeight,
-      dx: (Math.random() - 0.5) * 0.7,
-      dy: (Math.random() - 0.5) * 0.7,
+      dx: (Math.random() - 0.5) * VELOCIDAD,
+      dy: (Math.random() - 0.5) * VELOCIDAD,
       // Cada punto late a su propio ritmo para que el brillo no sea uniforme.
       fase: Math.random() * Math.PI * 2,
     }));
   };
 
-  const dibujar = (tiempo = 0) => {
+  const dibujar = () => {
+    const ahora = performance.now();
+    ultimoDibujo = ahora;
+    const t = ahora / 1000;
     ctx.clearRect(0, 0, innerWidth, innerHeight);
-    const t = tiempo / 1000;
 
     for (let i = 0; i < puntos.length; i++) {
       const a = puntos[i];
 
-      if (!quieto) {
-        a.x += a.dx;
-        a.y += a.dy;
-        if (a.x < 0 || a.x > innerWidth) a.dx *= -1;
-        if (a.y < 0 || a.y > innerHeight) a.dy *= -1;
+      a.x += a.dx;
+      a.y += a.dy;
+      if (a.x < 0 || a.x > innerWidth) a.dx *= -1;
+      if (a.y < 0 || a.y > innerHeight) a.dy *= -1;
 
-        // El cursor empuja suavemente los puntos cercanos.
-        const dRaton = Math.hypot(a.x - raton.x, a.y - raton.y);
-        if (dRaton < RATON) {
-          const fuerza = (1 - dRaton / RATON) * 0.6;
-          a.x += ((a.x - raton.x) / (dRaton || 1)) * fuerza;
-          a.y += ((a.y - raton.y) / (dRaton || 1)) * fuerza;
-        }
+      // El cursor empuja suavemente los puntos cercanos.
+      const dCursor = Math.hypot(a.x - raton.x, a.y - raton.y);
+      if (!suave && dCursor < RATON) {
+        const fuerza = (1 - dCursor / RATON) * 0.6;
+        a.x += ((a.x - raton.x) / (dCursor || 1)) * fuerza;
+        a.y += ((a.y - raton.y) / (dCursor || 1)) * fuerza;
       }
 
       // Líneas entre puntos vecinos
@@ -67,38 +71,40 @@
       }
 
       // Línea hacia el cursor: hace evidente que el fondo está vivo
-      const dRaton = Math.hypot(a.x - raton.x, a.y - raton.y);
-      if (dRaton < RATON) {
-        ctx.strokeStyle = `rgba(34, 211, 238, ${0.5 * (1 - dRaton / RATON)})`;
+      if (dCursor < RATON) {
+        ctx.strokeStyle = `rgba(34, 211, 238, ${0.5 * (1 - dCursor / RATON)})`;
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(raton.x, raton.y);
         ctx.stroke();
       }
 
-      const latido = quieto ? 1 : 0.75 + 0.25 * Math.sin(t * 1.6 + a.fase);
+      const latido = 0.75 + 0.25 * Math.sin(t * (suave ? 1.1 : 1.6) + a.fase);
       ctx.fillStyle = `rgba(147, 197, 253, ${0.85 * latido})`;
       ctx.beginPath();
       ctx.arc(a.x, a.y, 1.5 + latido * 0.8, 0, Math.PI * 2);
       ctx.fill();
     }
-
-    animacion = quieto ? null : requestAnimationFrame(dibujar);
   };
 
-  const arrancar = () => {
-    cancelAnimationFrame(animacion);
+  const bucle = () => {
     dibujar();
+    requestAnimationFrame(bucle);
   };
 
   medir();
-  arrancar();
-  addEventListener("resize", () => { medir(); arrancar(); });
+  requestAnimationFrame(bucle);
+
+  // Respaldo: algunos navegadores incrustados (el panel de vista previa del editor,
+  // por ejemplo) pintan la página pero la reportan como oculta, y ahí
+  // requestAnimationFrame nunca se ejecuta: el fondo quedaría dibujado una sola vez.
+  // Este temporizador solo actúa si hace rato que no se pinta un fotograma, y el
+  // propio navegador lo frena cuando la pestaña está de verdad en segundo plano.
+  setInterval(() => {
+    if (performance.now() - ultimoDibujo > 150) dibujar();
+  }, 40);
+
+  addEventListener("resize", medir);
   addEventListener("pointermove", (e) => { raton = { x: e.clientX, y: e.clientY }; }, { passive: true });
   addEventListener("pointerleave", () => { raton = { x: -9999, y: -9999 }; });
-  // Con la pestaña oculta no hay nada que dibujar: se libera la CPU.
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) cancelAnimationFrame(animacion);
-    else arrancar();
-  });
 })();
