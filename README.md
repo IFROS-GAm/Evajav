@@ -65,6 +65,20 @@ EVAJAV_TEST_OK=1 python tests/smoke.py
 62 verificaciones sobre las rutas reales. Escribe en la base de datos configurada en
 `.env` y limpia lo que crea; por eso exige la variable de confirmación.
 
+## Mantener la base activa
+
+El plan gratuito de Supabase **pausa el proyecto tras ~7 días sin actividad** y
+reactivarlo es manual. El repositorio incluye
+`.github/workflows/mantener-viva.yml`: cada tres días hace una consulta mínima a
+la base y con eso el proyecto cuenta como vivo.
+
+Para que funcione hay que crear el secreto `DATABASE_URL` en
+*Settings → Secrets and variables → Actions*. Se puede lanzar a mano desde la
+pestaña **Actions** para comprobarlo.
+
+Ojo: GitHub desactiva los cron de un repositorio tras 60 días sin commits (avisa
+por correo antes); una ejecución manual o cualquier commit los vuelve a activar.
+
 ## Despliegue en Render
 El repositorio incluye `render.yaml`. Al crear el servicio, Render usa:
 

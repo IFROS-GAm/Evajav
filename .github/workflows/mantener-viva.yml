@@ -1,0 +1,25 @@
+# Evita que Supabase pause el proyecto por inactividad (plan gratuito: ~7 días).
+# Requiere el secreto DATABASE_URL en el repositorio:
+#   Settings → Secrets and variables → Actions → New repository secret
+name: Mantener la base activa
+
+on:
+  schedule:
+    # Cada tres días a las 12:17 UTC (07:17 en Colombia). La hora "rara" es a
+    # propósito: en punto los cron de GitHub se saturan y se retrasan.
+    - cron: "47 13 */3 * *"
+  workflow_dispatch:        # también se puede lanzar a mano desde la pestaña Actions
+
+jobs:
+  consultar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet asyncpg
+      - name: Consulta mínima a la base
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python .github/scripts/ping_db.py
