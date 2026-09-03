@@ -1,52 +1,64 @@
 {% extends "base.html" %}
-
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Panel de Control{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-    <h2>Panel de Control General</h2>
-    <a href="/admin/reportes" class="btn-neumorfico" style="width: auto;">Ver Reportes de Resultados</a>
+{% if sin_admins %}
+<div class="alert warn">
+    No hay administradores en la base de datos: se está usando el acceso inicial del <code>.env</code>.
+    <a href="/admin/usuarios">Crea tu usuario ahora</a> para cerrar esa puerta.
+</div>
+{% endif %}
+
+<div class="head head-row">
+    <p class="kicker">Administración</p>
+    <h2 class="mb-0">Panel de control</h2>
+    <a class="btn ghost auto" href="/admin/reportes">Ver reportes</a>
 </div>
 
-<div class="grid-profesores">
-    <!-- Card de Periodo -->
-    <div class="caja-neumorfica" style="padding: 1.5rem;">
-        <h3 style="color: var(--accent-color);">Periodo de Votación</h3>
+<div class="grid">
+    <div class="card">
+        <h3>Periodo de votación</h3>
         {% if periodo_activo %}
-            <p style="color: #10b981; font-weight: bold;">Activo hasta: {{ periodo_activo.fecha_fin.strftime('%Y-%m-%d') }}</p>
+            <p><span class="badge ok">Abierto</span></p>
+            <p class="muted small">Cierra el {{ periodo_activo.fecha_fin|fecha('%d/%m/%Y a las %H:%M') }}</p>
+            <form action="/admin/periodo/cerrar" method="POST">
+                <button class="btn ghost" type="submit">Cerrar periodo ahora</button>
+            </form>
         {% else %}
-            <p style="color: var(--danger-color); font-weight: bold;">Cerrado o inactivo</p>
+            <p><span class="badge off">Cerrado</span></p>
+            <p class="muted small">Los estudiantes no pueden votar hasta que abras un periodo nuevo.</p>
         {% endif %}
-        
-        <hr style="border: 1px solid var(--shadow-dark); margin: 1.5rem 0;">
-        
+
+        <hr class="divider">
+
         <form action="/admin/periodo/nuevo" method="POST">
-            <label style="font-size: 0.9rem; color: var(--text-secondary);">Nuevo Periodo (Fecha Límite)</label>
-            <input type="datetime-local" name="fecha_fin" class="input-neumorfico" required style="margin-bottom: 1rem;">
-            <button type="submit" class="btn-neumorfico btn-secondary" style="font-size: 0.9rem;">Abrir Nuevo Periodo</button>
+            <label for="fecha_fin">Abrir periodo nuevo (fecha límite)</label>
+            <input class="input" type="datetime-local" id="fecha_fin" name="fecha_fin" required>
+            <button class="btn" type="submit">Abrir periodo</button>
         </form>
     </div>
 
-    <!-- Card de Estadísticas -->
-    <div class="caja-neumorfica" style="padding: 1.5rem; text-align: center;">
-        <h3 style="color: var(--accent-color);">Participación Global</h3>
-        
-        <h1 style="font-size: 4rem; margin: 1rem 0 0 0;">{{ total_votos }}</h1>
-        <p style="color: var(--text-secondary); margin-top: 0;">Votos Registrados</p>
-        
-        <hr style="border: 1px solid var(--shadow-dark); margin: 1.5rem 0;">
-        
-        <h2>{{ total_estudiantes }}</h2>
-        <p style="color: var(--text-secondary); margin-top: 0;">Estudiantes Registrados</p>
+    <div class="card center">
+        <h3>Participación</h3>
+        <p class="stat">{{ stats.votos }}</p>
+        <p class="muted small">evaluaciones registradas</p>
+        <hr class="divider">
+        <p class="stat">{{ stats.estudiantes }}</p>
+        <p class="muted small">estudiantes registrados</p>
+        <hr class="divider">
+        <p class="stat">{{ stats.profesores }}</p>
+        <p class="muted small mb-0">profesores activos</p>
     </div>
-    
-    <!-- Info -->
-    <div class="caja-neumorfica" style="padding: 1.5rem;">
-        <h3 style="color: var(--accent-color);">Información</h3>
-        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
-            Recuerda que los resultados estadísticos (reportes) <strong>solo deben ser interpretados una vez que el periodo haya cerrado</strong>, para no sesgar la percepción y asegurar el máximo nivel de anonimato.
-            <br><br>
-            Para gestionar Profesores y Grupos, por favor utiliza la consola SQL de Supabase de momento, para mantener la simplicidad del aplicativo en esta versión.
+
+    <div class="card">
+        <h3>Cómo funciona</h3>
+        <p class="muted small">
+            Los reportes muestran solo promedios por profesor del último periodo cerrado: nunca se puede
+            saber qué respondió cada estudiante.
+        </p>
+        <p class="muted small mb-0">
+            Para dar de alta profesores, grupos o asignaciones usa el editor SQL de Supabase
+            (tablas <strong>profesor</strong>, <strong>grupo</strong> y <strong>profesor_grupo</strong>).
         </p>
     </div>
 </div>

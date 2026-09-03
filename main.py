@@ -1,42 +1,49 @@
 import os
+import secrets
+import traceback
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from pathlib import Path
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
-from dotenv import load_dotenv
 
-from app.db import init_db, close_db
-from app.routes_estudiante import router as router_estudiante
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
+
+from app.db import close_db  # noqa: E402  (después de load_dotenv)
 from app.routes_admin import router as router_admin
+from app.routes_estudiante import router as router_estudiante
+from app.web import render
 
-load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Conectarse a Supabase al arrancar
-    await init_db()
+    # No conectamos aquí: el pool es perezoso, así la app arranca aunque la BD esté caída.
     yield
-    # Cerrar pool al apagar
     await close_db()
 
-app = FastAPI(lifespan=lifespan)
 
-import traceback
-from fastapi.responses import JSONResponse
-from fastapi import Request
-@app.exception_handler(Exception)
-async def catch_all(request: Request, exc: Exception):
-    traceback.print_exc()
-    return JSONResponse(status_code=500, content={"message": str(exc)})
+app = FastAPI(title="Evaluación Docente", lifespan=lifespan, docs_url=None, redoc_url=None)
 
-# Middleware para sesiones (necesario para guardar login de alumnos y admin)
-# NOTA: En un proyecto real, SECRET_KEY debe ser seguro y oculto en .env
-secret_key = os.getenv("SECRET_KEY", "secreto_desarrollo_temporal_123")
-app.add_middleware(SessionMiddleware, secret_key=secret_key)
-
-# Montar archivos estáticos (CSS, JS, imágenes)
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Incluir los endpoints de estudiantes y administrador
+# SECRET_KEY debe venir de .env. Sin ella se genera una al azar: las sesiones se
+# invalidan al reiniciar, pero nadie puede firmar cookies con un valor conocido.
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY") or secrets.token_hex(32),
+                   same_site="lax", https_only=os.getenv("HTTPS_ONLY") == "1")
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 app.include_router(router_estudiante)
 app.include_router(router_admin)
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse(BASE_DIR / "static" / "favicon.png")
+
+
+@app.exception_handler(Exception)
+async def error_interno(request: Request, exc: Exception):
+    """El detalle va al log del servidor, nunca al navegador (filtraría datos de la BD)."""
+    traceback.print_exc()
+    return render(request, "error.html", status_code=500)

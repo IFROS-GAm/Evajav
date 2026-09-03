@@ -1,46 +1,86 @@
 # Sistema de Evaluación Docente Anónima
 
-Una plataforma web construida con FastAPI y Jinja2 que permite a los estudiantes evaluar a sus profesores de forma anónima, utilizando Supabase (PostgreSQL) como base de datos y Chart.js para la visualización de resultados.
+Plataforma web (FastAPI + Jinja2) para que los estudiantes evalúen a sus profesores de forma
+anónima. Base de datos PostgreSQL en Supabase y reportes con gráficos de radar (Chart.js).
 
 ## Características
-- Diseño Neumórfico Oscuro (Neumorphism).
-- Validaciones de votos únicos mediante Carnet de Estudiante.
-- Asignación de profesores por grupo.
-- Panel administrativo con generación de reportes (solo visibles al cerrar el periodo).
+- Ingreso de estudiantes por número de carnet y registro con selección de grupo.
+- **Varios administradores** con contraseña hasheada (PBKDF2-SHA256) y dos roles:
+  `superadmin` (gestiona usuarios) y `coordinador` (periodos y reportes).
+- Cada estudiante solo ve y evalúa a los profesores asignados a su grupo.
+- Un voto por profesor y por periodo, garantizado por la base de datos.
+- Periodos de votación que el administrador abre y cierra.
+- Reportes con promedios por profesor, visibles solo cuando el periodo está cerrado.
+- Interfaz oscura, responsive y accesible con un único archivo CSS.
 
-## Requisitos Previos
+## Requisitos
 - Python 3.12+
-- Una cuenta en [Supabase](https://supabase.com/) (gratuita).
+- Un proyecto en [Supabase](https://supabase.com/) (plan gratuito sirve).
 
-## Instalación y Ejecución Local
+## Instalación local
 
-1. **Configurar la Base de Datos:**
-   - Ve a Supabase, crea un nuevo proyecto.
-   - En el SQL Editor de Supabase, pega y ejecuta el contenido del archivo `database.md`.
-   - Ve a los ajustes de base de datos (Database -> Connection string -> URI) y copia la URL de conexión.
+1. **Base de datos:** en el SQL Editor de Supabase ejecuta el contenido de `database.md`.
+   Luego copia la cadena de conexión (Database → Connection string → URI, puerto 6543).
 
-2. **Configurar Entorno:**
-   - Renombra el archivo `.env.example` a `.env` (o crea uno nuevo).
-   - Remplaza la variable `DATABASE_URL` por la URL de tu base de datos Supabase.
+2. **Variables de entorno:** crea un archivo `.env` en la raíz:
 
-3. **Instalar Dependencias:**
-   Se recomienda usar un entorno virtual:
+   ```env
+   DATABASE_URL=postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres
+   ADMIN_USERNAME=admin
+   ADMIN_PASSWORD=una-contraseña-propia
+   SECRET_KEY=cadena-larga-y-aleatoria
+   ```
+
+3. **Dependencias:**
+
    ```bash
    python -m venv venv
-   # En Windows:
-   .\venv\Scripts\Activate.ps1
-   # En Mac/Linux:
-   source venv/bin/activate
-   
+   .\venv\Scripts\Activate.ps1   # Windows  (source venv/bin/activate en Mac/Linux)
    pip install -r requirements.txt
    ```
 
-4. **Ejecutar la Aplicación:**
+4. **Ejecutar:**
+
    ```bash
    uvicorn main:app --reload
    ```
-   La aplicación estará disponible en `http://127.0.0.1:8000`.
 
-## Accesos por Defecto
-- **Estudiantes**: Necesitan registrarse previamente para poder iniciar sesión. Pueden usar un carnet inventado para pruebas.
-- **Admin**: Accede en la ruta `/admin` usando el usuario y contraseña definidos en el archivo `.env` (por defecto `admin` / `admin123`).
+   Disponible en `http://127.0.0.1:8000` (panel admin en `/admin`).
+
+## Accesos
+- **Estudiantes:** se registran en `/registro` con nombre, apellido, carnet y grupo.
+- **Admin:** `/admin`. Mientras la tabla `administrador` esté vacía se entra con
+  `ADMIN_USERNAME` / `ADMIN_PASSWORD` del `.env` **solo para crear el primer usuario**;
+  en cuanto existe un administrador activo, esas credenciales dejan de funcionar.
+- **Usuarios administradores:** `/admin/usuarios` (solo `superadmin`): crear cuentas,
+  cambiar contraseñas y activar o desactivar. Siempre debe quedar uno activo.
+
+## Pruebas
+
+```bash
+EVAJAV_TEST_OK=1 python tests/smoke.py
+```
+
+62 verificaciones sobre las rutas reales. Escribe en la base de datos configurada en
+`.env` y limpia lo que crea; por eso exige la variable de confirmación.
+
+## Despliegue en Render
+El repositorio incluye `render.yaml`. Al crear el servicio, Render usa:
+
+- Build: `pip install -r requirements.txt`
+- Start: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+
+Configura `DATABASE_URL`, `ADMIN_USERNAME` y `ADMIN_PASSWORD` en Environment
+(`SECRET_KEY` la genera Render). Usa siempre la URL del **pooler** (puerto 6543).
+
+## Notas técnicas
+- `statement_cache_size=0` es obligatorio con el pooler de Supabase (pgbouncer en modo
+  transaction); sin eso asyncpg falla con `DuplicatePreparedStatementError`.
+- El `search_path` se fija en la conexión: el pooler comparte conexiones entre
+  aplicaciones y un `SET` ajeno dejaría las consultas apuntando a otro esquema.
+- Las fechas se guardan en UTC y se muestran en `ZONA_HORARIA` (por defecto
+  `America/Bogota`), de ahí la dependencia `tzdata`.
+
+## Administración de datos
+Profesores, grupos y asignaciones profesor-grupo se gestionan desde el editor SQL de
+Supabase (tablas `profesor`, `grupo`, `profesor_grupo`).

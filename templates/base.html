@@ -3,32 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Sistema de Evaluación Docente{% endblock %}</title>
-    <link rel="stylesheet" href="/static/css/neumorphism.css">
+    <meta name="description" content="Plataforma de evaluación docente anónima.">
+    <title>{% block title %}Evaluación Docente{% endblock %}</title>
+    <link rel="icon" href="/static/favicon.png">
+    <link rel="stylesheet" href="/static/css/app.css?v=3">
 </head>
 <body>
-    <div id="particles-js"></div>
-    <nav class="navbar-superior">
-        <div class="logo">
-            <strong>Evaluación Docente</strong>
-        </div>
+    {% block fondo %}{% endblock %}
+    <nav class="nav">
+        <div class="brand">Evaluación <span>Docente</span></div>
         <div class="nav-links">
-            {% if request.session.get("estudiante_carnet") %}
-                <span>Hola, {{ request.session.get("estudiante_nombre") }}</span>
+            {% if request.session.get("estudiante_id") %}
+                <span class="nav-user">{{ request.session.get("estudiante_nombre") }}</span>
+                <a href="/dashboard">Mis profesores</a>
                 <a href="/logout">Salir</a>
             {% elif request.session.get("is_admin") %}
-                <span>Admin Panel</span>
+                <span class="nav-user">{{ request.session.get("admin_nombre") }} · {{ request.session.get("admin_rol") }}</span>
+                <a href="/admin/dashboard">Panel</a>
+                <a href="/admin/reportes">Reportes</a>
+                {% if request.session.get("admin_rol") == "superadmin" %}<a href="/admin/usuarios">Usuarios</a>{% endif %}
                 <a href="/admin/logout">Salir</a>
             {% else %}
-                <a href="/">Login Estudiantes</a>
+                <a href="/">Estudiantes</a>
+                <a href="/admin/login">Admin</a>
             {% endif %}
         </div>
     </nav>
 
-    <main class="container-principal">
+    <main class="wrap {% block wrap %}{% endblock %}">
+        {% if flash %}<div class="alert ok">{{ flash }}</div>{% endif %}
+        {% if error %}<div class="alert error">{{ error }}</div>{% endif %}
         {% block content %}{% endblock %}
     </main>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script src="/static/js/particles-config.js"></script>
+
+    <footer class="foot">Tus respuestas son anónimas: los reportes solo muestran promedios.</footer>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

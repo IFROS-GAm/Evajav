@@ -1,62 +1,52 @@
 {% extends "base.html" %}
+{% block title %}Evaluar a {{ profesor.nombre }} {{ profesor.apellido }}{% endblock %}
+{% block wrap %}mid{% endblock %}
 
-{% block title %}Evaluar Profesor{% endblock %}
+{% set aspectos = [
+    ("aspecto_1", "Dominio del tema", "¿Demuestra un conocimiento sólido de la materia?"),
+    ("aspecto_2", "Puntualidad", "¿Asiste y comienza las clases a la hora establecida?"),
+    ("aspecto_3", "Claridad en las explicaciones", "¿Explica los conceptos de forma comprensible?"),
+    ("aspecto_4", "Uso de recursos didácticos", "¿Aprovecha material de apoyo de forma efectiva?"),
+    ("aspecto_5", "Disposición para resolver dudas", "¿Responde con amabilidad las preguntas del grupo?"),
+    ("aspecto_6", "Evaluación justa", "¿Los exámenes corresponden al contenido enseñado?"),
+    ("aspecto_7", "Fomento de la participación", "¿Motiva a los estudiantes a intervenir?"),
+    ("aspecto_8", "Trato respetuoso", "¿Mantiene respeto y profesionalismo con el grupo?"),
+    ("aspecto_9", "Organización de las clases", "¿Cada sesión tiene una estructura clara?"),
+    ("aspecto_10", "Cumplimiento del temario", "¿Avanza conforme al programa del curso?")
+] %}
 
 {% block content %}
-<div class="caja-neumorfica" style="max-width: 800px; margin: 0 auto;">
-    <div style="text-align: center; margin-bottom: 2rem;">
-        <h2 style="margin-bottom: 0;">Evaluando a:</h2>
-        <h1 style="color: var(--accent-color);">{{ profesor.nombre }} {{ profesor.apellido }}</h1>
-        <p style="color: var(--text-secondary);">{{ profesor.materias }}</p>
-    </div>
+<div class="card center">
+    <p class="muted small mb-0">Evaluando a</p>
+    <h2>{{ profesor.nombre }} {{ profesor.apellido }}</h2>
+    <p class="muted small mb-0">{{ profesor.materias }}</p>
+</div>
 
-    <form action="/votar/{{ profesor.id }}" method="POST">
-        
-        <!-- Para no ensuciar demasiado el template, iteraremos los 10 aspectos con una macro o manual -->
-        {% set aspectos = [
-            ("aspecto_1", "1. Dominio del tema", "¿El profesor demuestra un conocimiento sólido sobre la materia que imparte?"),
-            ("aspecto_2", "2. Puntualidad", "¿Asiste y comienza las clases a la hora establecida?"),
-            ("aspecto_3", "3. Claridad en las explicaciones", "¿Explica de manera comprensible y clara los conceptos?"),
-            ("aspecto_4", "4. Uso de recursos didácticos", "¿Utiliza material de apoyo (diapositivas, lecturas, tablero) de forma efectiva?"),
-            ("aspecto_5", "5. Disposición para resolver dudas", "¿Se muestra accesible y responde amablemente las preguntas de los alumnos?"),
-            ("aspecto_6", "6. Evaluación justa", "¿Los exámenes y trabajos corresponden al contenido enseñado en clase?"),
-            ("aspecto_7", "7. Fomento de participación", "¿Motiva a los estudiantes a intervenir y dar sus opiniones?"),
-            ("aspecto_8", "8. Trato respetuoso", "¿Mantiene una actitud de respeto y profesionalismo hacia el grupo?"),
-            ("aspecto_9", "9. Organización de las clases", "¿Existe una estructura lógica y organizada durante cada sesión?"),
-            ("aspecto_10", "10. Cumplimiento del temario", "¿Avanza conforme al programa o sílabo establecido al inicio del curso?")
-        ] %}
+<div class="alert">
+    <strong>Instrucciones:</strong> califica cada aspecto del 1 (deficiente) al 5 (excelente).
+    Tus respuestas son anónimas y no se pueden modificar después de enviarlas.
+</div>
 
-        <div style="background-color: var(--bg-color); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-            <p style="margin: 0; font-size: 0.9rem;">
-                <strong>Instrucciones:</strong> Califica cada aspecto del 1 al 5, donde <strong>1</strong> es Deficiente y <strong>5</strong> es Excelente. Tus respuestas son 100% anónimas.
-            </p>
-        </div>
-
-        <ul class="lista-preguntas">
-            {% for name, title, desc in aspectos %}
-            <li class="pregunta-item caja-neumorfica" style="padding: 1.5rem; box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);">
-                <h4>{{ title }}</h4>
-                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">{{ desc }}</p>
-                
-                <div class="opciones-escala">
+<form action="/votar/{{ profesor.id }}" method="POST">
+    <ol class="preguntas">
+        {% for name, titulo, desc in aspectos %}
+        <li class="card">
+            <fieldset>
+                <legend><h4>{{ loop.index }}. {{ titulo }}</h4></legend>
+                <p class="muted small">{{ desc }}</p>
+                <div class="scale">
                     {% for i in range(1, 6) %}
-                    <label>
-                        <input type="radio" name="{{ name }}" value="{{ i }}" required>
-                        <span class="radio-btn-ui">{{ i }}</span>
-                    </label>
+                    <input type="radio" id="{{ name }}_{{ i }}" name="{{ name }}" value="{{ i }}" required>
+                    <label for="{{ name }}_{{ i }}">{{ i }}</label>
                     {% endfor %}
                 </div>
-            </li>
-            {% endfor %}
-        </ul>
+                <div class="scale-hint"><span>1 · Deficiente</span><span>5 · Excelente</span></div>
+            </fieldset>
+        </li>
+        {% endfor %}
+    </ol>
 
-        <div style="text-align: center; margin-top: 3rem;">
-            <button type="submit" class="btn-neumorfico" style="max-width: 300px; padding: 1rem 2rem; font-size: 1.1rem;">
-                Enviar Evaluación Anónima
-            </button>
-            <br><br>
-            <a href="/dashboard" style="color: var(--text-secondary); text-decoration: none;">Cancelar y volver</a>
-        </div>
-    </form>
-</div>
+    <button class="btn" type="submit">Enviar evaluación anónima</button>
+    <p class="center mt mb-0"><a class="muted" href="/dashboard">Cancelar y volver</a></p>
+</form>
 {% endblock %}

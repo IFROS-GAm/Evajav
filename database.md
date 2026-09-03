@@ -102,3 +102,22 @@ INSERT INTO profesor_grupo (profesor_id, grupo_id) VALUES
 -- IMPORTANTE: Cambia el ID de grupo según corresponda. El grupo 2 es '9-4'.
 INSERT INTO estudiante (nombre, apellido, carnet, grupo_id) VALUES 
 ('Juan', 'Pérez', '20231001', 2);
+
+-- ==============================================================================
+-- MIGRACIÓN 2026-09: administradores múltiples con contraseña hasheada
+-- Ejecuta este bloque en el SQL Editor de Supabase si ya tenías la base creada.
+-- ==============================================================================
+
+CREATE TABLE IF NOT EXISTS administrador (
+    id SERIAL PRIMARY KEY,
+    usuario TEXT UNIQUE NOT NULL,
+    nombre TEXT NOT NULL,
+    password_hash TEXT NOT NULL,          -- pbkdf2_sha256$iteraciones$salt$hash
+    rol TEXT NOT NULL DEFAULT 'coordinador' CHECK (rol IN ('superadmin', 'coordinador')),
+    activo BOOLEAN NOT NULL DEFAULT true,
+    ultimo_acceso TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Mientras esta tabla no tenga ninguna cuenta activa, el login de /admin acepta
+-- ADMIN_USERNAME / ADMIN_PASSWORD del .env solo para crear el primer usuario.

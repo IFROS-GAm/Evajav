@@ -1,63 +1,50 @@
 # AGENTS.md
 
-<<<<<<< HEAD
-## What this is
-FastAPI + Jinja2 teacher evaluation app. Deployed on Vercel. PostgreSQL via psycopg2.
+## Qué es esto
+App de evaluación docente anónima: FastAPI + Jinja2 + PostgreSQL (Supabase) con asyncpg.
+Despliegue en Render (`render.yaml`).
 
-## Run
+## Ejecutar
+    .\venv\Scripts\Activate.ps1
     uvicorn main:app --reload
 
-## Tests
-    pytest
+    EVAJAV_TEST_OK=1 python tests/smoke.py   # 62 verificaciones, escribe en la base real
 
-Requires live PostgreSQL. Set `DATABASE_URL` (or `POSTGRES_URL`) in `.env`.
+No hay linter ni typecheck configurados.
 
-## Gotchas
+## Estructura
+- `main.py` — app, sesiones, estáticos, handler de errores.
+- `app/db.py` — pool de asyncpg (`get_pool`) y `periodo_activo()`.
+- `app/web.py` — `render()` y `redirect()` (mensajes flash vía sesión).
+- `app/routes_estudiante.py` — login por carnet, registro, dashboard, votación.
+- `app/routes_admin.py` — login admin, periodos, reportes, gestión de administradores.
+- `app/security.py` — hash y verificación de contraseñas (PBKDF2, solo stdlib).
+- `templates/` + `static/css/app.css` — un solo CSS, sin estilos en línea.
+- `database.md` — script SQL para crear el esquema en Supabase.
 
-- **Auth is hardcoded** in `app/routes.py` (POST `/login`) and `static/js/index.js` (client-side). No env-based secrets — be careful not to expose or modify these carelessly.
-- **No lint/format/typecheck** is configured for this repo.
+## Detalles que se pasan por alto
+- **`statement_cache_size=0` es obligatorio** en `asyncpg.create_pool` (`app/db.py`): el pooler
+  de Supabase (puerto 6543, pgbouncer en modo transaction) no soporta prepared statements y
+  falla con `DuplicatePreparedStatementError`.
+- **El pool es perezoso**: la app arranca aunque la base de datos esté caída o pausada.
+- **Credenciales solo por entorno**: `DATABASE_URL`, `SECRET_KEY` y, para el primer
+  arranque, `ADMIN_USERNAME` / `ADMIN_PASSWORD` en `.env` o en el panel de Render.
+  `.env` nunca se commitea.
+- **Los administradores viven en la tabla `administrador`** con contraseña hasheada. Las
+  credenciales del `.env` solo sirven mientras esa tabla no tenga ninguna cuenta activa.
+- **No pasar texto a un parámetro con cast** (`$1::timestamptz`): asyncpg infiere el tipo
+  del cast y rechaza el `str`. Convertir en Python con `web.leer_fecha()`.
+- **Fechas**: se guardan en UTC y se muestran con los filtros `|fecha` y `|dia` (zona de
+  `ZONA_HORARIA`). No usar `.strftime()` directo en las plantillas.
+- **`search_path` explícito en el pool**: detrás del pooler un `SET search_path` de otra
+  aplicación se filtra entre conexiones.
+- **Anonimato**: `voto` guarda `estudiante_id` únicamente para el constraint
+  `UNIQUE(estudiante_id, profesor_id, periodo_id)`. Los reportes solo exponen promedios;
+  no agregar consultas que relacionen estudiante con respuesta.
+- **Un estudiante solo puede evaluar profesores de su grupo** (`profesor_grupo`): la
+  validación está en `routes_estudiante.py`, no la quites.
+- Profesores, grupos y asignaciones se administran desde el editor SQL de Supabase.
 
-## Rules
-
-- **Pedir permiso antes de modificar archivos**: Cada vez que se modifique un archivo, se debe solicitar permiso al usuario antes de aplicar los cambios.
-- **Testear al finalizar procesos**: Cada vez que termine algún proceso o tarea, se debe ejecutar un testeo para verificar que todo funciona correctamente.
-=======
-This file contains essential guidance for developers working in this repository. It answers: "Would an agent likely miss this without help?"
-
-## Setup & Development
-
-- Run `npm install` to install all dependencies.
-- Use `npm run dev` to start the development server.
-- The project uses TypeScript; compiled artifacts are in `.next/` (Next.js) or `dist/`.
-
-## Architecture
-
-- Entry point is `src/main.ts` (for CLI tools) or `pages/index.tsx` (for web apps).
-- The app is organized into:
-  - `src/components/`: Reusable React components
-  - `src/lib/`: Core logic and utilities
-  - `src/pages/`: Page routes (Next.js)
-- All code is linted with ESLint; type checked with TypeScript.
-
-## Commands
-
-- Run tests with `npm test`.
-- Lint with `npm run lint`.
-- Format code with `npm run format`.
-- Type-check with `npm run typecheck`.
-- Build the project with `npm run build`.
-- Run a specific test file (e.g., `src/components/Button.test.tsx`) using `npm test src/components/Button.test.tsx`.
-
-## Testing
-
-- Unit and integration tests reside in `__tests__/` or alongside source files as `.test.tsx`.
-- Snapshot testing is used where relevant.
-- Tests requiring network services must be mocked appropriately.
-- The CI workflow runs lint, typecheck, test, and build in strict order.
-
-## Special Notes
-
-- Generated code (e.g., `.generated.ts`) must not be modified directly; they are overwritten on regeneration.
-- Migrations are placed in `migrations/` and must be run manually via `npm run migrate`.
-- Environment variables are loaded using dotenv; see `.env.example` for reference.
->>>>>>> c26b636a3ff9b4817884dc49469ec3efb5b36ec0
+## Reglas
+- Pedir permiso antes de modificar archivos.
+- Probar al terminar cada tarea (mínimo: arrancar la app y recorrer las rutas).

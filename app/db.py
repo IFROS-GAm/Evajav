@@ -3,42 +3,42 @@ from pathlib import Path
 import asyncpg
 from dotenv import load_dotenv
 
-# Cargamos las variables de entorno
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not DATABASE_URL:
-    print("⚠️ ADVERTENCIA: DATABASE_URL no está configurada en .env")
-
 pool: asyncpg.Pool | None = None
+
 
 async def get_pool() -> asyncpg.Pool:
     """
-    Retorna el pool de conexiones a PostgreSQL.
-    Esto permite reutilizar conexiones y hacer la app más rápida.
+    Pool perezoso: se crea en la primera consulta, no al arrancar.
+    statement_cache_size=0 es obligatorio con el pooler de Supabase (pgbouncer en
+    modo transaction): sin esto asyncpg falla con DuplicatePreparedStatementError.
     """
     global pool
     if pool is None:
         if not DATABASE_URL:
-             raise RuntimeError("DATABASE_URL is not set")
-        # Iniciar el pool de asyncpg (ideal para Supabase)
-        pool = await asyncpg.create_pool(DATABASE_URL)
+            raise RuntimeError("DATABASE_URL no está configurada en .env")
+        pool = await asyncpg.create_pool(
+            DATABASE_URL, statement_cache_size=0, min_size=1, max_size=5,
+            # search_path explícito: el pooler comparte conexiones entre aplicaciones y
+            # un SET ajeno podría dejarnos apuntando a otro esquema.
+            server_settings={"search_path": "public"},
+        )
     return pool
 
-async def init_db():
-    """
-    Función para inicializar la conexión al arrancar el servidor.
-    No vamos a crear tablas aquí, porque usaremos database.md en Supabase directamente.
-    """
-    await get_pool()
-    print("OK: Conexión a la base de datos establecida.")
 
 async def close_db():
-    """
-    Cierra el pool de conexiones al apagar el servidor.
-    """
     global pool
     if pool is not None:
         await pool.close()
-        print("STOP: Conexión a la base de datos cerrada.")
+        pool = None
+
+
+async def periodo_activo(conn):
+    """Periodo abierto ahora mismo. Lo usan estudiantes y admin, para no descuadrarse."""
+    return await conn.fetchrow(
+        "SELECT id, fecha_inicio, fecha_fin FROM periodo_votacion "
+        "WHERE estado = true AND fecha_fin >= NOW() ORDER BY id DESC LIMIT 1"
+    )

@@ -1,24 +1,25 @@
 {% extends "base.html" %}
-
 {% block title %}Ingreso de Estudiantes{% endblock %}
+{% block wrap %}narrow{% endblock %}
+
+{% block fondo %}
+<canvas id="red" aria-hidden="true"></canvas>
+<script src="/static/js/red.js?v=3" defer></script>
+{% endblock %}
 
 {% block content %}
-<div class="caja-neumorfica" style="max-width: 400px; margin: 4rem auto; text-align: center;">
-    <h2>Ingreso Estudiantes</h2>
-    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Ingresa tu número de carnet para continuar.</p>
-    
-    {% if error %}
-    <div class="alert-error">{{ error }}</div>
-    {% endif %}
+<div class="card center">
+    <h2>Ingreso estudiantes</h2>
+    <p class="muted">Escribe tu número de carnet para continuar.</p>
 
     <form action="/login" method="POST">
-        <input type="text" name="carnet" class="input-neumorfico" placeholder="Ingresa tu carnet" required>
-        <button type="submit" class="btn-neumorfico">Entrar</button>
+        <label for="carnet">Carnet</label>
+        <input class="input" type="text" id="carnet" name="carnet" placeholder="Ej. 20231001" required autofocus>
+        <button class="btn" type="submit">Entrar</button>
     </form>
-    
-    <p style="margin-top: 2rem; font-size: 0.9rem;">
-        ¿Aún no estás registrado? <br>
-        <a href="/registro" style="color: var(--accent-color); text-decoration: none; font-weight: bold;">Regístrate aquí</a>
+
+    <p class="muted small mt">
+        ¿Aún no estás registrado? <a href="/registro">Regístrate aquí</a>
     </p>
 </div>
 {% endblock %}

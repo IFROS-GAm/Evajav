@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Usuarios administradores{% endblock %}
+
+{% block content %}
+<div class="head head-row">
+    <div>
+        <p class="kicker">Control de acceso</p>
+        <h2 class="mb-0">Usuarios administradores</h2>
+        <p class="muted small mb-0">
+            <strong>superadmin</strong>: gestiona usuarios y periodos · <strong>coordinador</strong>: periodos y reportes
+        </p>
+    </div>
+    <a class="btn ghost auto" href="/admin/dashboard">Volver al panel</a>
+</div>
+
+<div class="card">
+    <h3>Cuentas</h3>
+    <div class="tabla-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuario</th><th>Nombre</th><th>Rol</th><th>Estado</th>
+                    <th>Último acceso</th><th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for u in usuarios %}
+                <tr>
+                    <td class="mono">{{ u.usuario }}{% if u.id == yo %} <span class="badge neutral">tú</span>{% endif %}</td>
+                    <td>{{ u.nombre }}</td>
+                    <td><span class="badge{% if u.rol != 'superadmin' %} neutral{% endif %}">{{ u.rol }}</span></td>
+                    <td><span class="badge {{ 'ok' if u.activo else 'off' }}">{{ 'activo' if u.activo else 'inactivo' }}</span></td>
+                    <td class="mono small">{{ u.ultimo_acceso|fecha }}</td>
+                    <td>
+                        <div class="row-actions">
+                            <form action="/admin/usuarios/{{ u.id }}/password" method="POST" class="form-inline">
+                                <div>
+                                    <input class="input" type="password" name="password" placeholder="Nueva contraseña"
+                                           required minlength="8" aria-label="Nueva contraseña de {{ u.usuario }}">
+                                </div>
+                                <button class="btn sm auto" type="submit">Cambiar</button>
+                            </form>
+                            {% if u.id != yo %}
+                            <form action="/admin/usuarios/{{ u.id }}/estado" method="POST">
+                                <button class="btn sm auto {{ 'danger' if u.activo else 'ghost' }}" type="submit">
+                                    {{ 'Desactivar' if u.activo else 'Activar' }}
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6" class="muted">Sin administradores todavía. Crea el primero abajo.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Nuevo administrador</h3>
+    <form action="/admin/usuarios/nuevo" method="POST">
+        <div class="form-inline">
+            <div>
+                <label for="usuario">Usuario</label>
+                <input class="input mono" type="text" id="usuario" name="usuario" required
+                       pattern="[A-Za-z0-9._-]{3,32}" placeholder="coordinacion" autocomplete="off">
+            </div>
+            <div>
+                <label for="nombre">Nombre completo</label>
+                <input class="input" type="text" id="nombre" name="nombre" required placeholder="Ana Restrepo">
+            </div>
+            <div>
+                <label for="rol">Rol</label>
+                <select class="input" id="rol" name="rol">
+                    <option value="coordinador" selected>coordinador</option>
+                    <option value="superadmin">superadmin</option>
+                </select>
+            </div>
+            <div>
+                <label for="password">Contraseña</label>
+                <input class="input" type="password" id="password" name="password" required minlength="8"
+                       placeholder="mínimo 8, letras y números" autocomplete="new-password">
+            </div>
+        </div>
+        <button class="btn mt" type="submit">Crear administrador</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: evaluacion-docente
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      - key: HTTPS_ONLY
+        value: "1"
+      # Configura estas tres en el panel de Render (Environment), nunca en el repo:
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
