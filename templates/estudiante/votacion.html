@@ -15,6 +15,11 @@
     ("aspecto_10", "Cumplimiento del temario", "¿Avanza conforme al programa del curso?")
 ] %}
 
+{% block fondo %}
+<canvas id="red" aria-hidden="true"></canvas>
+<script src="/static/js/red.js?v=4" defer></script>
+{% endblock %}
+
 {% block content %}
 <div class="card center">
     <p class="muted small mb-0">Evaluando a</p>

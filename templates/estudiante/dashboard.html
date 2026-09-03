@@ -1,13 +1,18 @@
 {% extends "base.html" %}
 {% block title %}Mis Profesores{% endblock %}
 
+{% block fondo %}
+<canvas id="red" aria-hidden="true"></canvas>
+<script src="/static/js/red.js?v=4" defer></script>
+{% endblock %}
+
 {% block content %}
 <div class="head">
     <h2>Hola{% if nombre %}, {{ nombre.split(' ')[0] }}{% endif %} 👋</h2>
     <p class="muted mb-0">Evalúa con honestidad a los profesores de tu grupo. Cada evaluación es anónima.</p>
     {% if periodo %}
     <p class="small mt mb-0">
-        <span class="badge ok">Periodo abierto</span>
+        <span class="badge ok vivo">Periodo abierto</span>
         <span class="muted">cierra el {{ periodo.fecha_fin|fecha('%d/%m/%Y a las %H:%M') }}</span>
     </p>
     {% endif %}
