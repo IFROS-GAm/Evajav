@@ -418,3 +418,62 @@ tbody tr { transition: background 0.15s ease; }
   .btn::after { transition: none; }
   .scale input:checked + label { animation: none; }
 }
+
+/* ==================================================================
+   Barras de desplazamiento
+   Las nativas salen claras y desentonan con el panel oscuro. Se
+   redefinen en los dos estándares: el moderno (scrollbar-color, que
+   entiende Firefox) y el de WebKit (Chrome, Edge, Safari).
+================================================================== */
+
+/* Le dice al navegador que pinte en oscuro todo lo nativo: barras,
+   desplegables, calendarios del datetime-local y la barra de la ventana. */
+:root { color-scheme: dark; }
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(6 9 14 / 0.55);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb {
+  /* El borde transparente con background-clip deja aire alrededor del
+     pulgar: se ve más delgado sin reducir la zona en que se puede agarrar. */
+  background: var(--line-2);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover { background: #3d4b66; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:active { background: var(--accent); background-clip: padding-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* Las tablas anchas se desplazan dentro de su tarjeta: barra más fina, en
+   azul para que se note que ese bloque se mueve, y sin arrastrar el scroll
+   de la página al llegar al final. */
+.tabla-scroll {
+  overscroll-behavior-x: contain;
+  scrollbar-color: rgb(59 130 246 / 0.55) transparent;
+  padding-bottom: 0.35rem;
+}
+
+.tabla-scroll::-webkit-scrollbar { height: 9px; }
+.tabla-scroll::-webkit-scrollbar-thumb {
+  background: rgb(59 130 246 / 0.5);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+.tabla-scroll::-webkit-scrollbar-thumb:hover { background: var(--accent); background-clip: padding-box; }
+
+/* Área de texto de la carga masiva: misma barra fina */
+textarea.input { scrollbar-color: var(--line-2) transparent; }
