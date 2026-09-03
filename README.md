@@ -80,6 +80,10 @@ Ojo: GitHub desactiva los cron de un repositorio tras 60 días sin commits (avis
 por correo antes); una ejecución manual o cualquier commit los vuelve a activar.
 
 ## Despliegue en Render
+Guía completa campo por campo (y cómo evitar que Render duerma y Supabase se pause):
+[docs/despliegue-render.md del proyecto hermano](https://github.com/IFROS-GAm/Evajavfros/blob/main/docs/despliegue-render.md)
+— la sección «Si despliegas evaJav» indica qué variables cambian.
+
 El repositorio incluye `render.yaml`. Al crear el servicio, Render usa:
 
 - Build: `pip install -r requirements.txt`
