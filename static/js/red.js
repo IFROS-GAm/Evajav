@@ -1,26 +1,28 @@
-// Fondo de constelación animado: puntos que flotan, se unen entre sí y reaccionan al
-// cursor. Sin librerías ni CDN. Se dibuja detrás de todo y no recibe clics.
+// Fondo de constelación animado: puntos que flotan y se unen con una línea cuando
+// están cerca, más chispas que viajan por esas líneas. Sin librerías ni CDN.
+// Se dibuja detrás de todo, no recibe clics y no depende del puntero.
 (() => {
   const lienzo = document.getElementById("red");
   if (!lienzo) return;
 
   const ctx = lienzo.getContext("2d");
   // Con "menos movimiento" activado en el sistema el fondo NO se congela: se mueve
-  // algo más lento y deja de reaccionar al cursor. Quedarse quieto se leía como un
-  // fallo, y en Windows esa opción viene apagada con mucha frecuencia.
+  // algo más lento. Quedarse quieto se leía como un fallo, y en Windows esa opción
+  // viene apagada con mucha frecuencia.
   const suave = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const VELOCIDAD = suave ? 0.5 : 0.75;
-  const DISTANCIA = 155;   // hasta dónde se unen dos puntos
-  const RATON = 220;       // radio de influencia del cursor
-  const DENSIDAD = 8500;   // un punto por cada N píxeles de pantalla
+  const DISTANCIA = 155;      // hasta dónde se unen dos puntos
+  const DENSIDAD = 8500;      // un punto por cada N píxeles de pantalla
+  const CHISPAS = suave ? 2 : 4;
   let puntos = [];
-  let raton = { x: -9999, y: -9999 };
+  let chispas = [];
   let ultimoDibujo = 0;
 
   const medir = () => {
     const escala = Math.min(devicePixelRatio || 1, 2);
     lienzo.width = innerWidth * escala;
     lienzo.height = innerHeight * escala;
+    // Una unidad de dibujo = un píxel CSS, en cualquier pantalla.
     ctx.setTransform(escala, 0, 0, escala, 0, 0);
 
     const cuantos = Math.min(160, Math.round((innerWidth * innerHeight) / DENSIDAD));
@@ -32,6 +34,25 @@
       // Cada punto late a su propio ritmo para que el brillo no sea uniforme.
       fase: Math.random() * Math.PI * 2,
     }));
+    chispas = [];
+  };
+
+  // Una chispa recorre el tramo entre dos puntos vecinos y desaparece al llegar.
+  const nacerChispa = () => {
+    const a = Math.floor(Math.random() * puntos.length);
+    const cerca = [];
+    for (let b = 0; b < puntos.length; b++) {
+      if (b !== a && Math.hypot(puntos[a].x - puntos[b].x, puntos[a].y - puntos[b].y) < DISTANCIA) {
+        cerca.push(b);
+      }
+    }
+    if (!cerca.length) return;
+    chispas.push({
+      desde: a,
+      hasta: cerca[Math.floor(Math.random() * cerca.length)],
+      avance: 0,
+      paso: 0.006 + Math.random() * 0.008,
+    });
   };
 
   const dibujar = () => {
@@ -42,21 +63,11 @@
 
     for (let i = 0; i < puntos.length; i++) {
       const a = puntos[i];
-
       a.x += a.dx;
       a.y += a.dy;
       if (a.x < 0 || a.x > innerWidth) a.dx *= -1;
       if (a.y < 0 || a.y > innerHeight) a.dy *= -1;
 
-      // El cursor empuja suavemente los puntos cercanos.
-      const dCursor = Math.hypot(a.x - raton.x, a.y - raton.y);
-      if (!suave && dCursor < RATON) {
-        const fuerza = (1 - dCursor / RATON) * 0.6;
-        a.x += ((a.x - raton.x) / (dCursor || 1)) * fuerza;
-        a.y += ((a.y - raton.y) / (dCursor || 1)) * fuerza;
-      }
-
-      // Líneas entre puntos vecinos
       for (let j = i + 1; j < puntos.length; j++) {
         const b = puntos[j];
         const dist = Math.hypot(a.x - b.x, a.y - b.y);
@@ -70,21 +81,42 @@
         }
       }
 
-      // Línea hacia el cursor: hace evidente que el fondo está vivo
-      if (dCursor < RATON) {
-        ctx.strokeStyle = `rgba(34, 211, 238, ${0.5 * (1 - dCursor / RATON)})`;
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(raton.x, raton.y);
-        ctx.stroke();
-      }
-
       const latido = 0.75 + 0.25 * Math.sin(t * (suave ? 1.1 : 1.6) + a.fase);
       ctx.fillStyle = `rgba(147, 197, 253, ${0.85 * latido})`;
       ctx.beginPath();
       ctx.arc(a.x, a.y, 1.5 + latido * 0.8, 0, Math.PI * 2);
       ctx.fill();
     }
+
+    if (chispas.length < CHISPAS && Math.random() < 0.03) nacerChispa();
+
+    chispas = chispas.filter((chispa) => {
+      const a = puntos[chispa.desde];
+      const b = puntos[chispa.hasta];
+      if (!a || !b) return false;
+      chispa.avance += chispa.paso;
+      if (chispa.avance >= 1) return false;
+
+      const x = a.x + (b.x - a.x) * chispa.avance;
+      const y = a.y + (b.y - a.y) * chispa.avance;
+      // Estela corta detrás de la chispa
+      const cola = Math.max(0, chispa.avance - 0.12);
+      ctx.strokeStyle = "rgba(34, 211, 238, 0.55)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(a.x + (b.x - a.x) * cola, a.y + (b.y - a.y) * cola);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+
+      const brillo = ctx.createRadialGradient(x, y, 0, x, y, 6);
+      brillo.addColorStop(0, "rgba(165, 243, 252, 0.95)");
+      brillo.addColorStop(1, "rgba(34, 211, 238, 0)");
+      ctx.fillStyle = brillo;
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      return true;
+    });
   };
 
   const bucle = () => {
@@ -105,6 +137,4 @@
   }, 40);
 
   addEventListener("resize", medir);
-  addEventListener("pointermove", (e) => { raton = { x: e.clientX, y: e.clientY }; }, { passive: true });
-  addEventListener("pointerleave", () => { raton = { x: -9999, y: -9999 }; });
 })();
