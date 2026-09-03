@@ -4,6 +4,7 @@ import traceback
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import asyncpg
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
@@ -40,6 +41,17 @@ app.include_router(router_admin)
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
     return FileResponse(BASE_DIR / "static" / "favicon.png")
+
+
+@app.exception_handler(asyncpg.PostgresError)
+@app.exception_handler(OSError)
+async def base_caida(request: Request, exc: Exception):
+    """La base no responde (Supabase pausado, red caída): es un 503, no un fallo del usuario."""
+    traceback.print_exc()
+    return render(request, "error.html", status_code=503,
+                  titulo="Sin conexión con la base de datos",
+                  detalle="El sistema no puede consultar los datos en este momento. "
+                          "Vuelve a intentarlo en unos minutos.")
 
 
 @app.exception_handler(Exception)

@@ -58,6 +58,7 @@ anónima. Base de datos PostgreSQL en Supabase y reportes con gráficos de radar
 ## Pruebas
 
 ```bash
+pip install -r requirements-dev.txt   # añade httpx, que solo usan las pruebas
 EVAJAV_TEST_OK=1 python tests/smoke.py
 ```
 

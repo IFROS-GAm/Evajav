@@ -1,0 +1,3 @@
+# Solo para correr las pruebas; el servidor no lo necesita.
+-r requirements.txt
+httpx>=0.28

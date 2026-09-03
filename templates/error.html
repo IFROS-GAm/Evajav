@@ -9,8 +9,9 @@
 
 {% block content %}
 <div class="card center">
-    <h2>Algo salió mal</h2>
-    <p class="muted">No pudimos completar la operación. Intenta de nuevo en un momento.</p>
+    <p class="kicker">{{ 'Servicio no disponible' if titulo else 'Error del servidor' }}</p>
+    <h2>{{ titulo or "Algo salió mal" }}</h2>
+    <p class="muted">{{ detalle or "No pudimos completar la operación. Intenta de nuevo en un momento." }}</p>
     <a class="btn" href="/">Volver al inicio</a>
 </div>
 {% endblock %}
